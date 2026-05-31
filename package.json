@@ -1,0 +1,9 @@
+{
+  "name": "task-manager",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "sh -c 'python3 -m venv .venv && .venv/bin/python -m pip install -r backend/requirements.txt && trap \"kill 0\" EXIT; (cd backend && ../.venv/bin/python -m flask --app app run --port 5000) & npm --prefix frontend run dev & wait'",
+    "build": "npm --prefix frontend run build"
+  }
+}

@@ -129,7 +129,7 @@ def send_completion_email_if_needed(task: dict, status: str) -> str | None:
     try:
         send_email(
             creator["email"],
-            "Your task has been completed",
+            "Assigned task has been completed",
             f"Your task {task['title']} has been marked as completed",
         )
     except Exception as exc:
