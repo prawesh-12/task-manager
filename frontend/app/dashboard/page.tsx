@@ -24,8 +24,11 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
 
-  const loadDashboard = useCallback(async () => {
-    setError("");
+  const loadDashboard = useCallback(async ({ quiet = false } = {}) => {
+    if (!quiet) {
+      setError("");
+    }
+
     const [loadedUsers, loadedTasks] = await Promise.all([fetchUsers(), fetchTasks()]);
     setUsers(loadedUsers);
     setTasks(loadedTasks);
@@ -42,6 +45,21 @@ export default function DashboardPage() {
     loadDashboard()
       .catch(() => setError("Dashboard could not be loaded."))
       .finally(() => setLoading(false));
+
+    const syncTimer = window.setInterval(() => {
+      loadDashboard({ quiet: true }).catch(() => undefined);
+    }, 3000);
+
+    function syncOnFocus() {
+      loadDashboard({ quiet: true }).catch(() => undefined);
+    }
+
+    window.addEventListener("focus", syncOnFocus);
+
+    return () => {
+      window.clearInterval(syncTimer);
+      window.removeEventListener("focus", syncOnFocus);
+    };
   }, [loadDashboard, router]);
 
   const profile = useMemo(() => {
@@ -69,7 +87,7 @@ export default function DashboardPage() {
     const { task } = await createTask(input);
     setTasks((currentTasks) => mergeTask(currentTasks, task));
     setShowModal(false);
-    loadDashboard().catch(() => setError("Dashboard could not be synced."));
+    loadDashboard({ quiet: true }).catch(() => setError("Dashboard could not be synced."));
   }
 
   async function handleStatusChange(taskId: string, status: TaskStatus) {
@@ -83,7 +101,7 @@ export default function DashboardPage() {
     try {
       const { task } = await updateTaskStatus(taskId, status);
       setTasks((currentTasks) => mergeTask(currentTasks, task));
-      loadDashboard().catch(() => setError("Dashboard could not be synced."));
+      loadDashboard({ quiet: true }).catch(() => setError("Dashboard could not be synced."));
     } catch {
       setTasks(previousTasks);
       setError("Task status could not be updated.");
