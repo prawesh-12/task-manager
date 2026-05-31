@@ -2,7 +2,6 @@ export type User = {
   id: string;
   email: string;
   name: string;
-  avatar_url?: string | null;
 };
 
 export type TaskStatus = "pending" | "in_progress" | "completed";

@@ -4,7 +4,7 @@ from supabase_client import supabase
 def list_users() -> list[dict]:
     response = (
         supabase.table("users")
-        .select("id,email,name,avatar_url")
+        .select("id,email,name")
         .order("name")
         .execute()
     )
@@ -14,7 +14,7 @@ def list_users() -> list[dict]:
 def get_user(user_id: str) -> dict | None:
     response = (
         supabase.table("users")
-        .select("id,email,name,avatar_url")
+        .select("id,email,name")
         .eq("id", user_id)
         .execute()
     )

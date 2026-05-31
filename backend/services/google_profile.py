@@ -4,7 +4,7 @@ from googleapiclient.discovery import build
 from config import config
 
 
-def build_google_flow() -> Flow:
+def build_google_flow(state: str | None = None, code_verifier: str | None = None) -> Flow:
     callback_url = f"{config.BACKEND_URL}/auth/callback"
     client_config = {
         "web": {
@@ -19,6 +19,8 @@ def build_google_flow() -> Flow:
         client_config,
         scopes=config.GOOGLE_AUTH_SCOPES,
         redirect_uri=callback_url,
+        state=state,
+        code_verifier=code_verifier,
     )
 
 
@@ -26,13 +28,12 @@ def fetch_google_profile(credentials) -> dict:
     service = build("people", "v1", credentials=credentials)
     profile = (
         service.people()
-        .get(resourceName="people/me", personFields="names,emailAddresses,photos")
+        .get(resourceName="people/me", personFields="names,emailAddresses")
         .execute()
     )
 
     email = _first_item(profile.get("emailAddresses", []), "value")
     name = _first_item(profile.get("names", []), "displayName") or email
-    avatar_url = _first_item(profile.get("photos", []), "url")
     google_id = profile.get("resourceName", "").replace("people/", "")
 
     if not email or not google_id:
@@ -41,7 +42,6 @@ def fetch_google_profile(credentials) -> dict:
     return {
         "email": email,
         "name": name,
-        "avatar_url": avatar_url,
         "google_id": google_id,
     }
 

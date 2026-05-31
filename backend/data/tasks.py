@@ -3,8 +3,8 @@ from supabase_client import supabase
 
 TASK_SELECT_FIELDS = (
     "*,"
-    "creator:users!tasks_created_by_fkey(id,email,name,avatar_url),"
-    "assignee:users!tasks_assigned_to_fkey(id,email,name,avatar_url)"
+    "creator:users!tasks_created_by_fkey(id,email,name),"
+    "assignee:users!tasks_assigned_to_fkey(id,email,name)"
 )
 
 

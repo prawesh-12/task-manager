@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import type { SessionUser, User } from "@/lib/types";
 
 type NewTaskModalProps = {
@@ -20,16 +20,32 @@ export function NewTaskModal({
   onClose,
   onSubmit,
 }: NewTaskModalProps) {
-  const assignableUsers = useMemo(
-    () => users.filter((user) => user.id !== currentUser.id),
-    [users, currentUser.id]
-  );
+  const assignableUsers = useMemo(() => {
+    const usersById = new Map<string, User>();
+    users.forEach((user) => usersById.set(user.id, user));
+
+    if (!usersById.has(currentUser.id)) {
+      usersById.set(currentUser.id, {
+        id: currentUser.id,
+        email: currentUser.email || "",
+        name: currentUser.name || currentUser.email || "You",
+      });
+    }
+
+    return Array.from(usersById.values());
+  }, [users, currentUser]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [assignedTo, setAssignedTo] = useState(assignableUsers[0]?.id || "");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!assignableUsers.some((user) => user.id === assignedTo)) {
+      setAssignedTo(assignableUsers[0]?.id || "");
+    }
+  }, [assignableUsers, assignedTo]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

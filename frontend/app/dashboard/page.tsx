@@ -100,17 +100,6 @@ export default function DashboardPage() {
           <div className="font-mono text-xl font-bold">task-manager</div>
 
           <div className="flex items-center gap-3">
-            {isUser(profile) && profile.avatar_url ? (
-              <img
-                src={profile.avatar_url}
-                alt=""
-                className="h-9 w-9 rounded-full border border-app-border object-cover"
-              />
-            ) : (
-              <div className="grid h-9 w-9 place-items-center rounded-full border border-app-border text-sm text-app-secondary">
-                {(profile?.name || profile?.email || "U").slice(0, 1).toUpperCase()}
-              </div>
-            )}
             <div className="hidden min-w-0 text-right text-sm sm:block">
               <div className="truncate text-app-primary">{profile?.name || "User"}</div>
               <div className="truncate text-app-secondary">{profile?.email}</div>
@@ -221,8 +210,4 @@ function TaskSection({
       </div>
     </section>
   );
-}
-
-function isUser(profile: SessionUser | User | null): profile is User {
-  return Boolean(profile && "avatar_url" in profile);
 }
