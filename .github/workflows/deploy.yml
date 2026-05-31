@@ -68,7 +68,9 @@ jobs:
           cd "$EC2_APP_DIR"
 
           echo "Updating code"
-          git pull --ff-only origin main
+          git fetch origin main
+          git reset --hard origin/main
+          git clean -fd -e .env -e frontend/.env.production
 
           echo "Checking required env files"
           test -f .env
