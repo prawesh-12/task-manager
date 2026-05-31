@@ -72,6 +72,14 @@ def update_task(task_id):
     if not task:
         return jsonify({"error": "task not found"}), 404
 
+    if task["status"] == "completed":
+        if status != "completed":
+            return jsonify({"error": "completed tasks cannot be updated"}), 409
+        return jsonify({"task": task})
+
+    if status == task["status"]:
+        return jsonify({"task": task})
+
     updated = update_task_status(task_id, status)
     updated_task = get_task_for_user(updated["id"], g.current_user["id"])
 

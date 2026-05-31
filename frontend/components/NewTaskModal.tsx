@@ -21,19 +21,14 @@ export function NewTaskModal({
   onSubmit,
 }: NewTaskModalProps) {
   const assignableUsers = useMemo(() => {
-    const usersById = new Map<string, User>();
-    users.forEach((user) => usersById.set(user.id, user));
+    const currentEmail = currentUser.email?.toLowerCase();
 
-    if (!usersById.has(currentUser.id)) {
-      usersById.set(currentUser.id, {
-        id: currentUser.id,
-        email: currentUser.email || "",
-        name: currentUser.name || currentUser.email || "You",
-      });
-    }
-
-    return Array.from(usersById.values());
-  }, [users, currentUser]);
+    return users.filter((user) => {
+      const sameId = user.id === currentUser.id;
+      const sameEmail = currentEmail && user.email.toLowerCase() === currentEmail;
+      return !sameId && !sameEmail;
+    });
+  }, [users, currentUser.id, currentUser.email]);
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -57,7 +52,11 @@ export function NewTaskModal({
     }
 
     if (!assignedTo) {
-      setError("Choose an assignee.");
+      setError(
+        assignableUsers.length === 0
+          ? "No other users are available to assign."
+          : "Choose an assignee."
+      );
       return;
     }
 
@@ -113,12 +112,16 @@ export function NewTaskModal({
             <span className="mb-2 block text-sm text-app-secondary">Assign To</span>
             <select
               value={assignedTo}
+              disabled={assignableUsers.length === 0 || saving}
               onChange={(event) => setAssignedTo(event.target.value)}
               className="h-11 w-full rounded-md border border-app-border bg-app-bg px-3 text-app-primary outline-none transition focus:border-app-primary"
             >
+              {assignableUsers.length === 0 ? (
+                <option value="">No other users available</option>
+              ) : null}
               {assignableUsers.map((user) => (
                 <option key={user.id} value={user.id}>
-                  {user.name} ({user.email})
+                  {user.email}
                 </option>
               ))}
             </select>

@@ -27,27 +27,34 @@ export function TaskCard({
   onStatusChange,
   busy,
 }: TaskCardProps) {
-  const [confirmComplete, setConfirmComplete] = useState(false);
+  const [pendingStatus, setPendingStatus] = useState<TaskStatus | null>(null);
   const canUpdate = task.assigned_to === currentUser.id;
+  const statusLocked = task.status === "completed";
   const person = mode === "assigned" ? task.creator : task.assignee;
   const personLabel = mode === "assigned" ? "Created by" : "Assigned to";
+  const pendingStatusLabel = pendingStatus ? statusLabel[pendingStatus] : "";
 
   function handleStatusSelect(status: TaskStatus) {
     if (status === task.status) {
       return;
     }
 
-    if (status === "completed") {
-      setConfirmComplete(true);
+    if (status === "in_progress" || status === "completed") {
+      setPendingStatus(status);
       return;
     }
 
     onStatusChange(task.id, status);
   }
 
-  function confirmCompleted() {
-    setConfirmComplete(false);
-    onStatusChange(task.id, "completed");
+  function confirmStatusChange() {
+    if (!pendingStatus) {
+      return;
+    }
+
+    const status = pendingStatus;
+    setPendingStatus(null);
+    onStatusChange(task.id, status);
   }
 
   return (
@@ -76,7 +83,7 @@ export function TaskCard({
             <span className="sr-only">Task status</span>
             <select
               value={task.status}
-              disabled={!canUpdate || busy}
+              disabled={!canUpdate || busy || statusLocked}
               onChange={(event) => handleStatusSelect(event.target.value as TaskStatus)}
               className="h-9 min-w-36 rounded-md border border-app-primary bg-app-surface px-3 text-sm font-medium text-app-primary outline-none transition hover:bg-app-bg focus:border-app-primary disabled:hover:bg-app-surface"
             >
@@ -90,17 +97,21 @@ export function TaskCard({
         </div>
       </article>
 
-      {confirmComplete ? (
+      {pendingStatus ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-app-bg/80 px-4">
           <div className="w-full max-w-sm rounded-md border border-app-border bg-app-surface p-5">
-            <h2 className="text-base font-semibold text-app-primary">Complete Task?</h2>
+            <h2 className="text-base font-semibold text-app-primary">
+              Mark as {pendingStatusLabel}?
+            </h2>
             <p className="mt-2 text-sm leading-5 text-app-secondary">
-              This will mark "{task.title}" as completed and notify the creator.
+              {pendingStatus === "completed"
+                ? `This will mark "${task.title}" as completed and notify the creator. This cannot be changed later.`
+                : `This will mark "${task.title}" as in progress.`}
             </p>
             <div className="mt-5 flex justify-end gap-3">
               <button
                 type="button"
-                onClick={() => setConfirmComplete(false)}
+                onClick={() => setPendingStatus(null)}
                 className="h-10 rounded-md border border-app-border px-4 text-sm text-app-secondary transition hover:border-app-primary hover:text-app-primary"
               >
                 Cancel
@@ -108,10 +119,10 @@ export function TaskCard({
               <button
                 type="button"
                 disabled={busy}
-                onClick={confirmCompleted}
+                onClick={confirmStatusChange}
                 className="h-10 rounded-md bg-app-primary px-4 text-sm font-semibold text-app-bg"
               >
-                Complete
+                Confirm
               </button>
             </div>
           </div>

@@ -66,19 +66,26 @@ export default function DashboardPage() {
     description: string;
     assigned_to: string;
   }) {
-    await createTask(input);
-    await loadDashboard();
+    const { task } = await createTask(input);
+    setTasks((currentTasks) => mergeTask(currentTasks, task));
     setShowModal(false);
+    loadDashboard().catch(() => setError("Dashboard could not be synced."));
   }
 
   async function handleStatusChange(taskId: string, status: TaskStatus) {
+    const previousTasks = tasks;
     setBusyTaskId(taskId);
     setError("");
+    setTasks((currentTasks) =>
+      currentTasks.map((task) => (task.id === taskId ? { ...task, status } : task))
+    );
 
     try {
-      await updateTaskStatus(taskId, status);
-      await loadDashboard();
+      const { task } = await updateTaskStatus(taskId, status);
+      setTasks((currentTasks) => mergeTask(currentTasks, task));
+      loadDashboard().catch(() => setError("Dashboard could not be synced."));
     } catch {
+      setTasks(previousTasks);
       setError("Task status could not be updated.");
     } finally {
       setBusyTaskId(null);
@@ -166,6 +173,16 @@ export default function DashboardPage() {
       ) : null}
     </main>
   );
+}
+
+function mergeTask(tasks: Task[], updatedTask: Task) {
+  const existingIndex = tasks.findIndex((task) => task.id === updatedTask.id);
+
+  if (existingIndex === -1) {
+    return [updatedTask, ...tasks];
+  }
+
+  return tasks.map((task) => (task.id === updatedTask.id ? updatedTask : task));
 }
 
 function TaskSection({
