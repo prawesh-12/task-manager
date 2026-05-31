@@ -6,7 +6,8 @@ module.exports = {
       name: "backend",
       cwd: `${root}/backend`,
       script: `${root}/.venv/bin/gunicorn`,
-      args: "--bind 127.0.0.1:5000 app:app",
+      interpreter: "none",
+      args: `--chdir ${root}/backend --bind 127.0.0.1:5000 app:app`,
     },
     {
       name: "frontend",
