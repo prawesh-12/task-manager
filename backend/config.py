@@ -13,13 +13,13 @@ load_dotenv(BASE_DIR / ".env")
 
 class Config:
     SUPABASE_URL = os.getenv("SUPABASE_URL", "")
-    SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
+    SUPABASE_KEY = os.getenv("SUPABASE_KEY", "")
 
     GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID", "")
     GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET", "")
 
     GMAIL_SENDER = os.getenv("GMAIL_SENDER", "")
-    GMAIL_REFRESH_TOKEN = os.getenv("GMAIL_REFRESH_TOKEN", "")
+    GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
 
     FLASK_SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-flask-secret")
     JWT_SECRET = os.getenv("JWT_SECRET", "dev-jwt-secret")
@@ -32,7 +32,6 @@ class Config:
         "openid",
         "https://www.googleapis.com/auth/userinfo.email",
         "https://www.googleapis.com/auth/userinfo.profile",
-        "https://www.googleapis.com/auth/gmail.send",
     ]
 
 
